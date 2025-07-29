@@ -3,15 +3,45 @@
 import { Settings, User, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
 
-export function Navbar() {
+interface NavbarProps {
+  activeView: "sources" | "entities"
+  setActiveView: (view: "sources" | "entities") => void
+}
+
+export function Navbar({ activeView, setActiveView }: NavbarProps) {
   return (
-    <nav className="h-16 bg-white/10 backdrop-blur-sm border-b border-white/10 flex items-center justify-between px-6 flex-shrink-0">
-      <div className="flex items-center space-x-4">
-        <div className="text-2xl font-semibold text-gray-800">Circl</div>
+    <nav className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-white/15 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl px-6 py-3 flex items-center space-x-6 z-50">
+      <div className="text-xl font-semibold text-gray-800">Circl</div>
+      
+      {/* View Toggle Switch */}
+      <div className="relative bg-white/10 backdrop-blur-sm rounded-xl p-1 flex">
+        <button
+          onClick={() => setActiveView("sources")}
+          className={cn(
+            "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+            activeView === "sources"
+              ? "bg-white/20 text-gray-800 shadow-lg backdrop-blur-sm"
+              : "text-gray-600 hover:text-gray-800 hover:bg-white/10",
+          )}
+        >
+          Sources
+        </button>
+        <button
+          onClick={() => setActiveView("entities")}
+          className={cn(
+            "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+            activeView === "entities"
+              ? "bg-white/20 text-gray-800 shadow-lg backdrop-blur-sm"
+              : "text-gray-600 hover:text-gray-800 hover:bg-white/10",
+          )}
+        >
+          Entities
+        </button>
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-3">
         <Button variant="ghost" size="icon" className="text-gray-600 hover:text-gray-800 hover:bg-white/20">
           <Settings className="h-5 w-5" />
         </Button>

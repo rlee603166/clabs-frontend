@@ -110,13 +110,15 @@ export function SourcesCanvas({ selectedNodes, setSelectedNodes }: SourcesCanvas
         drop(node)
         canvasRef.current = node
       }}
-      className={`w-full h-full relative bg-white/5 backdrop-blur-sm transition-colors duration-200 overflow-hidden ${
+      className={`w-screen h-screen relative transition-colors duration-200 overflow-hidden ${
         isPanning ? "cursor-grabbing" : "cursor-grab"
-      } ${isOver ? "bg-white/10" : ""}`}
+      } ${isOver ? "bg-white/5" : ""}`}
       onMouseDown={handleMouseDown}
       style={{
+        backgroundColor: "#374151",
         backgroundImage: `
-          radial-gradient(circle, rgba(139, 92, 246, 0.1) 1px, transparent 1px)
+          linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)
         `,
         backgroundSize: "20px 20px",
         backgroundPosition: `${pan.x}px ${pan.y}px`,

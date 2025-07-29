@@ -188,7 +188,18 @@ export function EntitiesGraph() {
   }, [])
 
   return (
-    <div className="w-full h-full relative bg-white/5 backdrop-blur-sm overflow-hidden">
+    <div 
+      className="w-screen h-screen relative overflow-hidden"
+      style={{
+        backgroundColor: "#374151",
+        backgroundImage: `
+          linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)
+        `,
+        backgroundSize: "20px 20px",
+        backgroundPosition: `${pan.x}px ${pan.y}px`,
+      }}
+    >
       {/* Controls */}
       <div className="absolute bottom-4 right-4 flex flex-col space-y-2 z-10">
         <Button

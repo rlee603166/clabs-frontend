@@ -87,22 +87,22 @@ export function RightPane() {
   }
 
   return (
-    <div className="w-2/5 bg-white/5 backdrop-blur-sm border-l border-white/10 flex flex-col">
+    <div className="fixed right-4 top-20 w-80 h-96 bg-white/15 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl flex flex-col z-40">
       {/* Header */}
-      <div className="h-16 border-b border-white/10 flex items-center justify-between px-6 flex-shrink-0">
-        <div className="flex items-center space-x-4">
-          <div className="text-gray-600 text-sm">Ask Circl about your data...</div>
-          <div className="flex items-center space-x-2">
-            <Badge className="border-blue-500/30 text-blue-700 bg-blue-500/10 backdrop-blur-sm">
-              <Database className="h-3 w-3 mr-1" />
+      <div className="h-12 border-b border-white/10 flex items-center justify-between px-4 flex-shrink-0">
+        <div className="flex items-center space-x-3">
+          <div className="text-gray-600 text-xs font-medium">Ask Circl...</div>
+          <div className="flex items-center space-x-1">
+            <Badge className="border-blue-500/30 text-blue-700 bg-blue-500/10 backdrop-blur-sm text-xs px-1 py-0">
+              <Database className="h-2 w-2 mr-1" />
               SQL
             </Badge>
-            <Badge className="border-green-500/30 text-green-700 bg-green-500/10 backdrop-blur-sm">
-              <Search className="h-3 w-3 mr-1" />
+            <Badge className="border-green-500/30 text-green-700 bg-green-500/10 backdrop-blur-sm text-xs px-1 py-0">
+              <Search className="h-2 w-2 mr-1" />
               Vector
             </Badge>
-            <Badge className="border-purple-500/30 text-purple-700 bg-purple-500/10 backdrop-blur-sm">
-              <Network className="h-3 w-3 mr-1" />
+            <Badge className="border-purple-500/30 text-purple-700 bg-purple-500/10 backdrop-blur-sm text-xs px-1 py-0">
+              <Network className="h-2 w-2 mr-1" />
               Graph
             </Badge>
           </div>
@@ -112,15 +112,14 @@ export function RightPane() {
           variant="ghost"
           size="sm"
           onClick={clearChat}
-          className="text-gray-600 hover:text-gray-800 hover:bg-white/20"
+          className="text-gray-600 hover:text-gray-800 hover:bg-white/20 h-6 w-6 p-0"
         >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Clear Chat
+          <Trash2 className="h-3 w-3" />
         </Button>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}
