@@ -1,107 +1,221 @@
 "use client"
 
-import { useState } from "react"
-import { Send, Trash2, Database, Network, Search } from "lucide-react"
+import { useState, useRef, useEffect } from "react"
+import { Send, Trash2, MessageSquare, Database, Network, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { ChatMessage } from "@/components/chat-message"
+import { 
+  StreamingConversation, 
+  StreamChunk,
+  StreamingMessage,
+  FunctionResultChunk
+} from "@/lib/streaming-types"
+import {
+  TextChunkRenderer,
+  FunctionCallChunkRenderer,
+  FunctionResultChunkRenderer,
+  TableChunkRenderer,
+  ThinkingChunkRenderer,
+  ErrorChunkRenderer
+} from "@/components/chunk-renderers"
 
-const demoMessages = [
-  {
-    id: "1",
-    type: "user" as const,
-    content: "Show me customers similar to Acme Corp",
-    timestamp: new Date(Date.now() - 300000),
-  },
-  {
-    id: "2",
-    type: "bot" as const,
-    content: "Found 12 similar customers based on industry and company size...",
-    data: [
-      { name: "TechFlow Inc", industry: "Technology", size: "Medium", similarity: "94%" },
-      { name: "DataCorp Solutions", industry: "Technology", size: "Medium", similarity: "89%" },
-      { name: "CloudTech Systems", industry: "Technology", size: "Large", similarity: "87%" },
-    ],
-    latency: { sql: "45ms", vector: "120ms" },
-    functions: ["find_similar_customer_by_profile", "get_customer_details"],
-    timestamp: new Date(Date.now() - 280000),
-  },
-  {
-    id: "3",
-    type: "user" as const,
-    content: "Which of these have recent support tickets?",
-    timestamp: new Date(Date.now() - 120000),
-  },
-  {
-    id: "4",
-    type: "bot" as const,
-    content: "3 customers have tickets in the last 30 days...",
-    data: [
-      { customer: "TechFlow Inc", tickets: "5", last_ticket: "2 days ago", priority: "High" },
-      { customer: "DataCorp Solutions", tickets: "2", last_ticket: "1 week ago", priority: "Medium" },
-      { customer: "CloudTech Systems", tickets: "8", last_ticket: "3 days ago", priority: "High" },
-    ],
-    latency: { sql: "23ms", graph: "67ms" },
-    functions: ["get_customer_support_tickets", "traverse_customer_relationships"],
-    timestamp: new Date(Date.now() - 100000),
-  },
-]
+// Demo streaming conversation
+const demoConversation: StreamingConversation = {
+  id: "demo-conv-1",
+  is_streaming: false,
+  messages: [
+    {
+      id: "msg-1",
+      chunks: [
+        {
+          id: "chunk-1",
+          type: "text",
+          timestamp: Date.now() - 300000,
+          status: "complete",
+          content: {
+            text: "Show me customers similar to Acme Corp"
+          }
+        }
+      ],
+      status: "complete",
+      created_at: Date.now() - 300000
+    },
+    {
+      id: "msg-2", 
+      chunks: [
+        {
+          id: "chunk-2a",
+          type: "function_call",
+          timestamp: Date.now() - 280000,
+          status: "complete",
+          content: {
+            name: "find_similar_customers",
+            args: { company: "Acme Corp", criteria: ["industry", "size"] },
+            description: "Finding customers with similar profiles"
+          }
+        },
+        {
+          id: "chunk-2b",
+          type: "function_result",
+          timestamp: Date.now() - 270000,
+          status: "complete",
+          content: {
+            function_call_id: "chunk-2a",
+            result: { found: 12, processing_time: "45ms" },
+            success: true
+          }
+        },
+        {
+          id: "chunk-2c",
+          type: "text",
+          timestamp: Date.now() - 265000,
+          status: "complete",
+          content: {
+            text: "Found 12 similar customers based on industry and company size. Here are the top matches:"
+          }
+        },
+        {
+          id: "chunk-2d",
+          type: "table",
+          timestamp: Date.now() - 260000,
+          status: "complete",
+          content: {
+            title: "Similar Customers",
+            headers: ["Company", "Industry", "Size", "Similarity"],
+            rows: [
+              ["TechFlow Inc", "Technology", "Medium", "94%"],
+              ["DataCorp Solutions", "Technology", "Medium", "89%"],
+              ["CloudTech Systems", "Technology", "Large", "87%"]
+            ],
+            description: "Customers ranked by similarity score using industry and company size metrics"
+          }
+        }
+      ],
+      status: "complete",
+      created_at: Date.now() - 280000
+    }
+  ]
+}
 
 export function RightPane() {
-  const [messages, setMessages] = useState(demoMessages)
+  const [conversation, setConversation] = useState<StreamingConversation>(demoConversation)
   const [inputValue, setInputValue] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
+  const [isStreaming, setIsStreaming] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to bottom when new chunks arrive
+  useEffect(() => {
+    if (scrollRef.current && conversation?.messages) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [conversation?.messages])
 
   const handleSend = () => {
-    if (!inputValue.trim()) return
+    if (!inputValue.trim() || isStreaming) return
 
-    const newUserMessage = {
-      id: Date.now().toString(),
-      type: "user" as const,
-      content: inputValue,
-      timestamp: new Date(),
+    const newUserMessage: StreamingMessage = {
+      id: `msg-${Date.now()}`,
+      chunks: [{
+        id: `chunk-${Date.now()}`,
+        type: "text",
+        timestamp: Date.now(),
+        status: "complete",
+        content: { text: inputValue }
+      }],
+      status: "complete",
+      created_at: Date.now()
     }
 
-    setMessages((prev) => [...prev, newUserMessage])
+    setConversation(prev => ({
+      ...prev,
+      messages: [...prev.messages, newUserMessage],
+      is_streaming: true
+    }))
     setInputValue("")
-    setIsTyping(true)
+    setIsStreaming(true)
 
-    // Simulate bot response
+    // Simulate streaming AI response
     setTimeout(() => {
-      const botMessage = {
-        id: (Date.now() + 1).toString(),
-        type: "bot" as const,
-        content: "I'm analyzing your request across all connected data stores...",
-        latency: { sql: "34ms", vector: "89ms", graph: "156ms" },
-        functions: ["analyze_query", "cross_store_search"],
-        timestamp: new Date(),
+      const aiMessage: StreamingMessage = {
+        id: `msg-${Date.now() + 1}`,
+        chunks: [{
+          id: `chunk-${Date.now() + 1}`,
+          type: "text",
+          timestamp: Date.now(),
+          status: "complete",
+          content: { text: "I'm analyzing your request across all connected data stores..." }
+        }],
+        status: "complete",
+        created_at: Date.now()
       }
-      setMessages((prev) => [...prev, botMessage])
-      setIsTyping(false)
+      setConversation(prev => ({
+        ...prev, 
+        messages: [...prev.messages, aiMessage],
+        is_streaming: false
+      }))
+      setIsStreaming(false)
     }, 2000)
   }
 
   const clearChat = () => {
-    setMessages([])
+    setConversation({
+      id: `conv-${Date.now()}`,
+      messages: [],
+      is_streaming: false
+    })
+  }
+
+  const renderChunk = (chunk: StreamChunk, messageIndex: number, chunkIndex: number) => {
+    const isLatest = conversation?.messages && messageIndex === conversation.messages.length - 1 && 
+                    chunkIndex === conversation.messages[messageIndex].chunks.length - 1
+
+    const key = `${chunk.id}-${chunkIndex}`
+
+    // For function calls, find the corresponding result
+    if (chunk.type === 'function_call') {
+      const message = conversation.messages[messageIndex]
+      const functionResult = message.chunks.find(c => 
+        c.type === 'function_result' && 
+        c.content.function_call_id === chunk.id
+      ) as FunctionResultChunk | undefined
+
+      return <FunctionCallChunkRenderer key={key} chunk={chunk} functionResult={functionResult} isLatest={isLatest} />
+    }
+
+    switch (chunk.type) {
+      case 'text':
+        return <TextChunkRenderer key={key} chunk={chunk} isLatest={isLatest} />
+      case 'function_result':
+        // Skip rendering function results separately since they're now part of function calls
+        return null
+      case 'table':
+        return <TableChunkRenderer key={key} chunk={chunk} isLatest={isLatest} />
+      case 'thinking':
+        return <ThinkingChunkRenderer key={key} chunk={chunk} isLatest={isLatest} />
+      case 'error':
+        return <ErrorChunkRenderer key={key} chunk={chunk} isLatest={isLatest} />
+      default:
+        return null
+    }
   }
 
   return (
-    <div className="fixed right-4 top-20 w-80 h-96 bg-white/15 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl flex flex-col z-40">
+    <div className="fixed right-4 top-[10%] w-1/3 h-[80%] bg-white/15 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl flex flex-col z-40">
       {/* Header */}
       <div className="h-12 border-b border-white/10 flex items-center justify-between px-4 flex-shrink-0">
         <div className="flex items-center space-x-3">
-          <div className="text-gray-600 text-xs font-medium">Ask Circl...</div>
+          <div className="text-gray-200 text-xs font-medium">Ask Circl...</div>
           <div className="flex items-center space-x-1">
-            <Badge className="border-blue-500/30 text-blue-700 bg-blue-500/10 backdrop-blur-sm text-xs px-1 py-0">
+            <Badge className="border-blue-500/30 text-blue-300 bg-blue-500/10 backdrop-blur-sm text-xs px-1 py-0">
               <Database className="h-2 w-2 mr-1" />
               SQL
             </Badge>
-            <Badge className="border-green-500/30 text-green-700 bg-green-500/10 backdrop-blur-sm text-xs px-1 py-0">
+            <Badge className="border-green-500/30 text-green-300 bg-green-500/10 backdrop-blur-sm text-xs px-1 py-0">
               <Search className="h-2 w-2 mr-1" />
               Vector
             </Badge>
-            <Badge className="border-purple-500/30 text-purple-700 bg-purple-500/10 backdrop-blur-sm text-xs px-1 py-0">
+            <Badge className="border-purple-500/30 text-purple-300 bg-purple-500/10 backdrop-blur-sm text-xs px-1 py-0">
               <Network className="h-2 w-2 mr-1" />
               Graph
             </Badge>
@@ -112,38 +226,38 @@ export function RightPane() {
           variant="ghost"
           size="sm"
           onClick={clearChat}
-          className="text-gray-600 hover:text-gray-800 hover:bg-white/20 h-6 w-6 p-0"
+          className="text-gray-400 hover:text-gray-200 hover:bg-white/20 h-6 w-6 p-0"
         >
           <Trash2 className="h-3 w-3" />
         </Button>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.map((message) => (
-          <ChatMessage key={message.id} message={message} />
-        ))}
-
-        {isTyping && (
-          <div className="flex items-start space-x-3">
-            <div className="w-8 h-8 bg-blue-500/80 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-sm font-bold">
-              C
-            </div>
-            <div className="bg-white/15 backdrop-blur-md rounded-2xl p-3 max-w-xs border border-white/20">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-600 rounded-full animate-bounce"></div>
-                <div
-                  className="w-2 h-2 bg-gray-600 rounded-full animate-bounce"
-                  style={{ animationDelay: "0.1s" }}
-                ></div>
-                <div
-                  className="w-2 h-2 bg-gray-600 rounded-full animate-bounce"
-                  style={{ animationDelay: "0.2s" }}
-                ></div>
+      <div className="flex-1 overflow-hidden">
+        <div ref={scrollRef} className="h-full overflow-y-auto p-4 space-y-3">
+            {!conversation?.messages || conversation.messages.length === 0 ? (
+              <div className="text-center text-gray-400 text-sm py-8">
+                <MessageSquare className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                <p>Start a conversation with the AI</p>
+                <p className="text-xs mt-1">See function calls and results in real-time</p>
               </div>
-            </div>
-          </div>
-        )}
+            ) : (
+              conversation.messages.map((message, messageIndex) => (
+                <div key={message.id} className="space-y-2">
+                  {message.chunks.map((chunk, chunkIndex) => 
+                    renderChunk(chunk, messageIndex, chunkIndex)
+                  )}
+                  {/* Message status indicator */}
+                  {message.status === 'streaming' && (
+                    <div className="flex items-center space-x-2 text-xs text-gray-400">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+                      <span>Processing...</span>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+        </div>
       </div>
 
       {/* Input */}
@@ -152,16 +266,28 @@ export function RightPane() {
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="What would you like to know about your data?"
-            className="flex-1 bg-white/10 border-white/20 text-gray-800 placeholder-gray-600 backdrop-blur-sm rounded-xl"
+            placeholder={isStreaming ? "AI is responding..." : "What would you like to know about your data?"}
+            className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-gray-400 backdrop-blur-sm rounded-xl"
             onKeyPress={(e) => e.key === "Enter" && handleSend()}
+            disabled={isStreaming}
           />
           <Button
             onClick={handleSend}
-            className="bg-blue-500/80 hover:bg-blue-600/80 text-white backdrop-blur-sm rounded-xl"
+            disabled={!inputValue.trim() || isStreaming}
+            className="bg-blue-500/80 hover:bg-blue-600/80 disabled:bg-gray-400/50 text-white backdrop-blur-sm rounded-xl"
           >
             <Send className="h-4 w-4" />
           </Button>
+        </div>
+        
+        {/* Connection Status */}
+        <div className="mt-3 flex justify-between items-center text-xs">
+          <Badge className="bg-green-500/20 text-green-200 border-green-500/30 backdrop-blur-sm">
+            {conversation?.messages?.length || 0} messages
+          </Badge>
+          <span className="text-gray-400">
+            {isStreaming ? "Connected & streaming" : "Ready"}
+          </span>
         </div>
       </div>
     </div>

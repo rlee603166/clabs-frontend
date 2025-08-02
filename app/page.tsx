@@ -12,13 +12,18 @@ import { HTML5Backend } from "react-dnd-html5-backend"
 export default function Home() {
   const [activeView, setActiveView] = useState<"sources" | "entities">("sources")
   const [selectedNodes, setSelectedNodes] = useState<string[]>([])
-  const [connectedSources, setConnectedSources] = useState<string[]>(["customers", "orders", "support_tickets"])
+  const [connectedSources, setConnectedSources] = useState<string[]>([])
 
   return (
     <DndProvider backend={HTML5Backend}>
       {/* FULLSCREEN CANVAS - THE MAP */}
       {activeView === "sources" ? (
-        <SourcesCanvas selectedNodes={selectedNodes} setSelectedNodes={setSelectedNodes} />
+        <SourcesCanvas 
+          selectedNodes={selectedNodes} 
+          setSelectedNodes={setSelectedNodes}
+          connectedSources={connectedSources}
+          setConnectedSources={setConnectedSources}
+        />
       ) : (
         <EntitiesGraph />
       )}

@@ -1,0 +1,354 @@
+version: '1.0'
+generated_at: '2025-07-23T02:11:45.031962'
+metadata:
+  extraction_config:
+    postgresql:
+      host: localhost
+      port: 5432
+      database: circle
+      user: ryanlee
+      password: null
+      schemas:
+      - public
+    pinecone:
+      api_key: pcsk_5hsntQ_McuNhMA4JH6MPBt4wBzx4h28y1f5UDop37BBhvT2NcVu4z9xWHaFb5UY7q6CzG9
+      environment: us-east-1-aws
+    neo4j:
+      uri: bolt://localhost:7687
+      user: neo4j
+      password: Ilovebaseball2!
+  entity_count: 5
+logical_model:
+  entities:
+    customers:
+      fields:
+      - name: customer_id
+        type: integer
+        nullable: false
+        primary_key: true
+        constraints: []
+      - name: name
+        type: string
+        nullable: true
+        primary_key: false
+        constraints: []
+      - name: email
+        type: string
+        nullable: true
+        primary_key: false
+        constraints: []
+      - name: signup_date
+        type: date
+        nullable: true
+        primary_key: false
+        constraints: []
+      - name: total_spent
+        type: decimal
+        nullable: true
+        primary_key: false
+        constraints: []
+      relations:
+      - name: customers_orders
+        target: orders
+        type: one_to_many
+      - name: customers_reviews
+        target: reviews
+        type: one_to_many
+      - name: customers_order
+        target: Order
+        type: many_to_many
+      - name: customers_review
+        target: Review
+        type: many_to_many
+    orders:
+      fields:
+      - name: order_id
+        type: integer
+        nullable: false
+        primary_key: true
+        constraints: []
+      - name: customer_id
+        type: integer
+        nullable: true
+        primary_key: false
+        constraints: []
+      - name: amount
+        type: decimal
+        nullable: true
+        primary_key: false
+        constraints: []
+      - name: order_date
+        type: date
+        nullable: true
+        primary_key: false
+        constraints: []
+      - name: product_id
+        type: integer
+        nullable: true
+        primary_key: false
+        constraints: []
+      relations:
+      - name: orders_customers
+        target: customers
+        type: many_to_one
+      - name: orders_products
+        target: products
+        type: many_to_one
+      - name: orders_product
+        target: Product
+        type: many_to_many
+    products:
+      fields:
+      - name: product_id
+        type: integer
+        nullable: false
+        primary_key: true
+        constraints: []
+      - name: product_name
+        type: text
+        nullable: true
+        primary_key: false
+        constraints: []
+      relations:
+      - name: products_orders
+        target: orders
+        type: one_to_many
+      - name: products_reviews
+        target: reviews
+        type: one_to_many
+    reviews:
+      fields:
+      - name: review_id
+        type: integer
+        nullable: false
+        primary_key: true
+        constraints: []
+      - name: customer_id
+        type: integer
+        nullable: true
+        primary_key: false
+        constraints: []
+      - name: rating
+        type: integer
+        nullable: true
+        primary_key: false
+        constraints: []
+      - name: timestamp
+        type: date
+        nullable: true
+        primary_key: false
+        constraints: []
+      - name: product_id
+        type: integer
+        nullable: true
+        primary_key: false
+        constraints: []
+      - name: vector_id
+        type: text
+        nullable: true
+        primary_key: false
+        constraints: []
+      - name: review_content 
+        type: vector
+        nullable: true
+        primary_key: false
+        constraints: []
+      relations:
+      - name: reviews_customers
+        target: customers
+        type: many_to_one
+      - name: reviews_products
+        target: products
+        type: many_to_one
+      - name: reviews_product
+        target: Product
+        type: many_to_many
+store_mappings:
+  sql:
+    description: Transactional data and complex queries
+    capabilities:
+    - crud_operations
+    - transactions
+    - complex_joins
+    - aggregations
+    entities:
+      customers:
+        table_name: customers
+        fields:
+        - signup_date
+        - total_spent
+        - name
+        - customer_id
+        - email
+      orders:
+        table_name: orders
+        fields:
+        - product_id
+        - order_date
+        - order_id
+        - amount
+        - customer_id
+      products:
+        table_name: products
+        fields:
+        - product_id
+        - product_name
+      reviews:
+        table_name: reviews
+        fields:
+        - timestamp
+        - product_id
+        - vector_id
+        - rating
+        - customer_id
+        - review_id
+  graph:
+    description: Relationship traversals and network analysis
+    capabilities:
+    - path_finding
+    - relationship_traversal
+    - pattern_matching
+    nodes:
+      customers:
+        labels:
+        - :`Customer`
+        properties:
+        - signup_date
+        - total_spent
+        - name
+        - customer_id
+        - email
+      orders:
+        labels:
+        - :`Order`
+        properties:
+        - product_id
+        - order_date
+        - order_id
+        - amount
+        - customer_id
+      products:
+        labels:
+        - :`Product`
+        properties:
+        - product_id
+        - product_name
+      reviews:
+        labels:
+        - :`Review`
+        properties:
+        - timestamp
+        - product_id
+        - vector_id
+        - rating
+        - customer_id
+        - review_id
+    edges:
+    - type: HAS_ORDER
+      source: customers
+      target: Order
+      properties: []
+    - type: HAS_REVIEW
+      source: customers
+      target: Review
+      properties: []
+    - type: PRODUCT_NAME
+      source: orders
+      target: Product
+      properties: []
+    - type: PRODUCT_NAME
+      source: reviews
+      target: Product
+      properties: []
+  vector:
+    description: Semantic search and similarity matching
+    capabilities:
+    - similarity_search
+    - semantic_search
+    - knn
+    collections:
+      reviews:
+        index_name: coffee
+        dimension: 384
+        metric: cosine
+        fields:
+        - review_content
+cross_store_operations: []
+sync_rules:
+- name: sync_customers_sql_to_graph
+  source: sql.customers
+  target: graph.customers
+  trigger: on_change
+  consistency: eventual
+  fields:
+  - signup_date
+  - total_spent
+  - name
+  - customer_id
+  - email
+- name: sync_orders_sql_to_graph
+  source: sql.orders
+  target: graph.orders
+  trigger: on_change
+  consistency: eventual
+  fields:
+  - product_id
+  - order_date
+  - order_id
+  - amount
+  - customer_id
+- name: sync_products_sql_to_graph
+  source: sql.products
+  target: graph.products
+  trigger: on_change
+  consistency: eventual
+  fields:
+  - product_id
+  - product_name
+- name: sync_reviews_sql_to_graph
+  source: sql.reviews
+  target: graph.reviews
+  trigger: on_change
+  consistency: eventual
+  fields:
+  - timestamp
+  - product_id
+  - vector_id
+  - rating
+  - customer_id
+  - review_id
+tool_generation:
+  sql:
+    patterns:
+    - name: crud
+      description: Generate read operations for each entity
+    - name: query_builder
+      description: Dynamic query construction with filtering
+    - name: batch_operations
+      description: Fetch related entity operations
+    - name: stats
+      description: Generate statistical aggregate queries for numeric fields
+    - name: grouped_by
+      description: Generate grouped aggregation queries for categorical fields
+    - name: top_by
+      description: Generate top N queries ordered by specific fields
+    - name: recent
+      description: Generate recent record queries ordered by date/datetime fields
+    - name: full_text_search
+      description: Generate text search queries across string/text fields
+  graph:
+    patterns:
+    - name: read
+      description: Fetch single entities from graph
+    - name: traversal
+      description: Follow relationships between entities
+    - name: fetch_operations
+      description: Retrieve related entities from graph
+  vector:
+    patterns:
+    - name: read
+      description: Fetch single entities by vector ID
+    - name: similarity_search
+      description: Find similar entities using semantic search
+    - name: fetch_operations
+      description: Retrieve entities by vector IDs
