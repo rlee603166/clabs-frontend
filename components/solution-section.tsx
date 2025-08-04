@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Database, VectorThree, Graph, ArrowRight, Sparkle } from "@phosphor-icons/react"
+import { Database, VectorThree, Graph, ArrowRight, Sparkle, ArrowDown } from "@phosphor-icons/react"
 
 export function SolutionSection() {
   const features = [
@@ -48,9 +48,9 @@ export function SolutionSection() {
           viewport={{ once: true }}
           className="mb-20"
         >
-          <div className="flex items-center justify-center space-x-8 mb-12">
+          <div className="relative flex flex-col items-center space-y-8 mb-12">
             {/* Data Sources */}
-            <div className="flex flex-col space-y-4">
+            <div className="flex items-center justify-center space-x-12">
               {[
                 { Icon: Database, color: "#336791", label: "SQL" },
                 { Icon: VectorThree, color: "#00D4AA", label: "Vector" },
@@ -58,65 +58,82 @@ export function SolutionSection() {
               ].map((source, index) => (
                 <motion.div
                   key={source.label}
-                  initial={{ x: -50, opacity: 0 }}
-                  whileInView={{ x: 0, opacity: 1 }}
+                  initial={{ y: 50, opacity: 0 }}
+                  whileInView={{ y: 0, opacity: 1 }}
                   transition={{ delay: index * 0.1, duration: 0.6 }}
                   viewport={{ once: true }}
-                  className="w-16 h-16 rounded-xl backdrop-blur-md bg-[#252528]/60 border border-[#374151]/30 flex items-center justify-center"
+                  className="flex flex-col items-center space-y-2"
                 >
-                  <source.Icon size={24} style={{ color: source.color }} />
+                  <div className="w-16 h-16 rounded-xl backdrop-blur-md bg-[#252528]/60 border border-[#374151]/30 flex items-center justify-center">
+                    <source.Icon size={24} style={{ color: source.color }} />
+                  </div>
+                  <span className="text-xs text-[#94a3b8] font-medium">{source.label}</span>
+
+                  {/* Connection lines to the layer above */}
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    whileInView={{ opacity: 1, height: 24 }}
+                    transition={{ delay: 0.5 + index * 0.1, duration: 0.6 }}
+                    viewport={{ once: true }}
+                    className="w-px bg-gradient-to-t from-[#3b82f6]/40 to-transparent"
+                  ></motion.div>
                 </motion.div>
               ))}
             </div>
 
-            {/* Arrow */}
-            <motion.div
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-              viewport={{ once: true }}
-            >
-              <ArrowRight size={32} className="text-[#3b82f6]" />
-            </motion.div>
-
-            {/* Circl Engine */}
-            <motion.div
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
-              transition={{ delay: 0.7, duration: 0.8 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
+            {/* Circl Engine Layer - spans over data sources */}
+            <div className="relative">
+              {/* Circl Engine */}
               <motion.div
-                animate={{
-                  boxShadow: [
-                    "0 0 20px rgba(59, 130, 246, 0.3)",
-                    "0 0 40px rgba(59, 130, 246, 0.6)",
-                    "0 0 20px rgba(59, 130, 246, 0.3)",
-                  ],
-                }}
-                transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
-                className="w-24 h-24 rounded-2xl backdrop-blur-md bg-[#3b82f6]/20 border border-[#3b82f6]/50 flex items-center justify-center"
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                transition={{ delay: 0.7, duration: 0.8 }}
+                viewport={{ once: true }}
+                className="relative z-10 mx-auto"
               >
-                <div className="text-xl font-bold text-[#3b82f6]">C</div>
+                <motion.div
+                  animate={{
+                    boxShadow: [
+                      "0 0 20px rgba(59, 130, 246, 0.3)",
+                      "0 0 40px rgba(59, 130, 246, 0.6)",
+                      "0 0 20px rgba(59, 130, 246, 0.3)",
+                    ],
+                  }}
+                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+                  className="w-80 h-20 rounded-2xl backdrop-blur-md bg-[#3b82f6]/20 border border-[#3b82f6]/50 flex items-center justify-center"
+                >
+                  <div className="text-xl font-bold text-[#3b82f6]">Circl Engine</div>
+                </motion.div>
               </motion.div>
-            </motion.div>
 
-            {/* Arrow */}
-            <motion.div
+              {/* Fabric/Layer effect - subtle connecting lines */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: 0.9, duration: 0.8 }}
+                viewport={{ once: true }}
+                className="absolute inset-0 flex justify-center items-center pointer-events-none"
+              >
+                <div className="w-96 h-px bg-gradient-to-r from-transparent via-[#3b82f6]/30 to-transparent"></div>
+              </motion.div>
+            </div>
+
+            {/* Arrow pointing up */}
+            {/* <motion.div
               initial={{ scale: 0 }}
               whileInView={{ scale: 1 }}
-              transition={{ delay: 0.9, duration: 0.6 }}
+              transition={{ delay: 1.0, duration: 0.6 }}
               viewport={{ once: true }}
-            >
-              <ArrowRight size={32} className="text-[#3b82f6]" />
-            </motion.div>
+              className="-rotate-180"
+            > */}
+            <ArrowDown size={32} className="text-[#3b82f6]" />
+            {/* </motion.div> */}
 
             {/* API Endpoint */}
             <motion.div
-              initial={{ x: 50, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              transition={{ delay: 1.1, duration: 0.6 }}
+              initial={{ y: -30, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              transition={{ delay: 1.2, duration: 0.6 }}
               viewport={{ once: true }}
               className="backdrop-blur-md bg-[#252528]/80 border border-[#374151]/30 rounded-xl px-6 py-4"
             >

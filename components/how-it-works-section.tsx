@@ -7,35 +7,35 @@ export function HowItWorksSection() {
   const steps = [
     {
       number: "1",
-      title: "Connect Sources",
-      description: "Link your SQL, Vector, and Graph databases with simple configuration.",
+      title: "Connect your data stores",
+      description: "We build the multi-modal data engine for you.",
       Icon: PlugsConnected,
     },
     {
       number: "2",
       title: "Define Entities",
-      description: "Create a unified entity model that spans all your data sources.",
+      description: "We auto-generate a canonical schema for your agent.",
       Icon: Cube,
     },
     {
       number: "3",
-      title: "Use Tools",
-      description: "Get auto-generated, production-ready tools for your AI agents.",
+      title: "Call the SDK",
+      description: "Get immediate access to a library of powerful agentic tools.",
       Icon: Wrench,
     },
   ]
 
-  const codeExample = `// An agent needs to find at-risk customers
-const atRiskCustomers = await circl.tools.find_customers_with_decreasing_usage();
+  const codeExample = `// Stripe-like integration
+from circl import Circl
+from openai import OpenAI
 
-for (const customer of atRiskCustomers) {
-  // Now, find the right person to contact at that company
-  const contact = await circl.tools.get_internal_champion({ 
-    companyId: customer.companyId 
-  });
-  
-  // ... alert the sales team
-}`
+client = Circl(OpenAI())
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=agent_messages
+)
+
+results = client.tool_runner(response)`
 
   return (
     <section className="py-24 px-6">
@@ -47,7 +47,7 @@ for (const customer of atRiskCustomers) {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl lg:text-5xl font-medium mb-6">From Data to Action in 3 Steps.</h2>
+          <h2 className="text-4xl lg:text-5xl font-medium mb-6">An Instant Backend for Your Agent</h2>
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -96,7 +96,7 @@ for (const customer of atRiskCustomers) {
                   <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
                 </div>
-                <div className="text-sm text-[#94a3b8] font-mono">agent.ts</div>
+                <div className="text-sm text-[#94a3b8] font-mono">agent.py</div>
               </div>
 
               {/* Code Content */}

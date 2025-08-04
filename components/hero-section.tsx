@@ -30,8 +30,7 @@ export function HeroSection() {
             </h1>
 
             <p className="text-xl text-[#94a3b8] leading-relaxed max-w-2xl">
-              Stop wrestling with brittle integrations. Circl unifies your SQL, Vector, and Graph data into an
-              intelligent Action Layer, instantly generating robust tools for your AI agents.
+              One API for all your databases. Stop building integrations, start building intelligence.
             </p>
           </div>
 

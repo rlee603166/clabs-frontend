@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Headset, TrendUp, ArrowRight } from "@phosphor-icons/react"
+import { Headset, TrendUp } from "@phosphor-icons/react"
 
 export function UseCasesSection() {
   const [activeTab, setActiveTab] = useState(0)
@@ -59,11 +59,10 @@ export function UseCasesSection() {
                 <button
                   key={index}
                   onClick={() => setActiveTab(index)}
-                  className={`flex items-center space-x-3 px-6 py-3 rounded-xl transition-all ${
-                    activeTab === index
-                      ? "bg-[#3b82f6]/20 text-[#3b82f6] border border-[#3b82f6]/30"
-                      : "text-[#94a3b8] hover:text-[#f8fafc]"
-                  }`}
+                  className={`flex items-center space-x-3 px-6 py-3 rounded-xl transition-all ${activeTab === index
+                    ? "bg-[#3b82f6]/20 text-[#3b82f6] border border-[#3b82f6]/30"
+                    : "text-[#94a3b8] hover:text-[#f8fafc]"
+                    }`}
                 >
                   <useCase.icon size={20} />
                   <span className="font-medium">{useCase.title}</span>
@@ -104,25 +103,73 @@ export function UseCasesSection() {
                     <div className="text-[#f8fafc] font-mono text-sm">{useCases[activeTab].simulation.query}</div>
                   </div>
 
-                  {/* Steps */}
-                  <div className="space-y-3">
-                    {useCases[activeTab].simulation.steps.map((step, stepIndex) => (
-                      <motion.div
-                        key={stepIndex}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: stepIndex * 0.2 }}
-                        className="flex items-start space-x-3"
-                      >
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#3b82f6]/20 border border-[#3b82f6]/30 flex items-center justify-center mt-1">
-                          <ArrowRight size={12} className="text-[#3b82f6]" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="text-sm font-mono text-[#3b82f6] mb-1">{step.tool}</div>
-                          <div className="text-sm text-[#94a3b8]">{step.action}</div>
-                        </div>
-                      </motion.div>
-                    ))}
+                  {/* Steps Timeline */}
+                  <div className="relative">
+                    {/* Animated connecting line */}
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{ height: `${(useCases[activeTab].simulation.steps.length - 1) * 80 + 12}px` }}
+                      transition={{ duration: 1, delay: 0.9 }}
+                      className="absolute left-3 top-3 w-0.5 bg-gradient-to-b from-[#3b82f6] to-[#3b82f6]/30"
+                    />
+
+                    <div className="space-y-6">
+                      {useCases[activeTab].simulation.steps.map((step, stepIndex) => (
+                        <motion.div
+                          key={stepIndex}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{
+                            delay: stepIndex * 0.3 + 0.5,
+                            duration: 0.6,
+                            ease: "easeOut"
+                          }}
+                          className="flex items-start space-x-4 relative"
+                        >
+                          {/* Animated dot */}
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{
+                              delay: stepIndex * 0.3 + 0.7,
+                              duration: 0.4,
+                              type: "spring",
+                              stiffness: 200
+                            }}
+                            className="flex-shrink-0 w-6 h-6 rounded-full bg-[#3b82f6] border-2 border-[#1e293b] shadow-lg shadow-[#3b82f6]/25 z-10 relative"
+                          >
+                            {/* Inner glow */}
+                            <div className="absolute inset-1 rounded-full bg-[#60a5fa] opacity-60" />
+                          </motion.div>
+
+                          {/* Content */}
+                          <div className="flex-1 pt-0.5">
+                            <motion.div
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{
+                                delay: stepIndex * 0.3 + 0.9,
+                                duration: 0.5
+                              }}
+                              className="text-sm font-mono text-[#3b82f6] mb-1"
+                            >
+                              {step.tool}
+                            </motion.div>
+                            <motion.div
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{
+                                delay: stepIndex * 0.3 + 1.1,
+                                duration: 0.5
+                              }}
+                              className="text-sm text-[#94a3b8]"
+                            >
+                              {step.action}
+                            </motion.div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Result */}
