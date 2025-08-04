@@ -7,7 +7,7 @@ import { UseCasesSection } from "@/components/use-cases-section"
 import { FinalCTASection } from "@/components/final-cta-section"
 import { Navigation } from "@/components/navigation"
 
-export default function Home() {
+export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#161618] text-[#f8fafc] relative overflow-x-hidden">
       {/* Dot grid background */}

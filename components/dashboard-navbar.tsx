@@ -1,9 +1,10 @@
 "use client"
 
-import { Settings, User, ChevronDown } from "lucide-react"
+import { Settings, User, ChevronDown, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 interface NavbarProps {
   activeView: "sources" | "entities"
@@ -42,6 +43,12 @@ export function Navbar({ activeView, setActiveView }: NavbarProps) {
       </div>
 
       <div className="flex items-center space-x-3">
+        <Link href="/">
+          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-white/20">
+            <Home className="h-5 w-5" />
+          </Button>
+        </Link>
+        
         <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-white/20">
           <Settings className="h-5 w-5" />
         </Button>

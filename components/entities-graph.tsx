@@ -68,32 +68,32 @@ export function EntitiesGraph() {
   const handleWheel = useCallback(
     (e: WheelEvent) => {
       e.preventDefault()
-      
+
       if (e.ctrlKey || e.metaKey) {
         // Zoom functionality with Ctrl/Cmd + wheel
         const container = svgRef.current?.parentElement
         const rect = container?.getBoundingClientRect()
         if (!rect) return
-        
+
         // Use smaller, more controlled zoom increments
         const zoomSensitivity = 0.02
         const deltaY = Math.sign(e.deltaY) // Normalize to -1, 0, or 1
         const zoomDelta = -deltaY * zoomSensitivity
-        
+
         const newZoom = Math.max(0.1, Math.min(3, zoom + zoomDelta))
-        
+
         // Get mouse position relative to container
         const mouseX = e.clientX - rect.left
         const mouseY = e.clientY - rect.top
-        
+
         // Calculate the point in the canvas coordinate system
         const canvasPointX = (mouseX - pan.x) / zoom
         const canvasPointY = (mouseY - pan.y) / zoom
-        
+
         // Calculate new pan to keep the same point under the mouse
         const newPanX = mouseX - canvasPointX * newZoom
         const newPanY = mouseY - canvasPointY * newZoom
-        
+
         setZoom(newZoom)
         setPan({ x: newPanX, y: newPanY })
       } else {
@@ -410,22 +410,20 @@ export function EntitiesGraph() {
     <div
       className="w-screen h-screen relative overflow-hidden"
       style={{
+        overflow: 'hidden',
         backgroundColor: "#242629",
-        // backgroundColor: "#FFF",
-        // backgroundImage: `
-        //   linear-gradient(rgba(0, 0, 0, 0.15) 1px, transparent 1px),
-        //   linear-gradient(90deg, rgba(0, 0, 0, 0.15) 1px, transparent 1px)
-        // `,
         backgroundImage: `
           linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
           linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)
         `,
         backgroundSize: `${20 * zoom}px ${20 * zoom}px`,
         backgroundPosition: `${pan.x}px ${pan.y}px`,
+        backgroundAttachment: 'fixed'
       }}
     >
+
       {/* Controls */}
-      <div className="absolute bottom-4 right-4 flex flex-col space-y-2 z-10">
+      <div className="absolute bottom-4 right-4 flex flex-row items-center space-x-2 z-10">
         <Button
           variant="secondary"
           size="icon"

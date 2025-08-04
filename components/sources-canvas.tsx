@@ -202,8 +202,8 @@ export function SourcesCanvas({ selectedNodes, setSelectedNodes, connectedSource
       }}
       className={`w-screen h-screen relative transition-colors duration-200 overflow-hidden ${isPanning ? "cursor-grabbing" : "cursor-grab"
         } ${isOver ? "bg-white/5" : ""}`}
-      onMouseDown={handleMouseDown}
       style={{
+        overflow: 'hidden',
         backgroundColor: "#242629",
         backgroundImage: `
           linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
@@ -211,7 +211,9 @@ export function SourcesCanvas({ selectedNodes, setSelectedNodes, connectedSource
         `,
         backgroundSize: `${20 * zoom}px ${20 * zoom}px`,
         backgroundPosition: `${pan.x}px ${pan.y}px`,
+        backgroundAttachment: 'fixed'
       }}
+      onMouseDown={handleMouseDown}
     >
       {/* Canvas background layer for panning */}
       <div className="canvas-background absolute inset-0 z-0" />
